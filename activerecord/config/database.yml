@@ -3,3 +3,9 @@ development:
   database: dog_park_development
   username:
   password:
+
+test:
+  adapter: postgresql
+  database: dog_park_test
+  username:
+  password:

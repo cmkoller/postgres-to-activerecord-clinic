@@ -11,37 +11,27 @@ Dir[File.join(File.dirname(__FILE__), 'lib', '**', '*.rb')].each do |file|
   also_reload file
 end
 
-def db_connection
-  begin
-    connection = PG.connect(dbname: 'dog_park')
-    yield (connection)
-  ensure
-    connection.close
-  end
-end
-
 get '/dogs' do
-  dogs = db_connection do |conn|
-    conn.exec("SELECT * FROM dogs;")
-  end
+  dogs = Dog.all
 
   erb :"dogs/index", locals: { dogs: dogs }
 end
 
 get '/dogs/new' do
-  owners = db_connection do |conn|
-    conn.exec("SELECT * FROM owners;")
-  end
-  erb :"/dogs/new", locals: { owners: owners }
+  owners = Owner.all
+  erb :"/dogs/new", locals: { owners: owners, dog: Dog.new }
 end
 
 post '/dogs' do
-  db_connection do |conn|
-    conn.exec_params(
-      "INSERT INTO dogs (name, age, owner_id) VALUES ($1, $2, $3)",
-      [params[:name], 0, params[:owner]]
-    )
+  dog = Dog.new(name: params[:name], age: params[:age], owner_id: params[:owner_id])
+
+  if dog.save
+    # Assuming we have the flash gem set up:
+    # flash[:success] = "You did it!"
+    redirect "/dogs"
+  else
+    # flash[:error] = dog.errors.full_messages
+    erb :"/dogs/new", locals: { owners: Owner.all, dog: dog }
   end
 
-  redirect "/dogs"
 end
