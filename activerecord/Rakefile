@@ -1,0 +1,14 @@
+require 'rspec/core/rake_task'
+require "sinatra/activerecord/rake"
+
+RSpec::Core::RakeTask.new :spec do |task|
+  task.pattern = Dir['spec/**/*_spec.rb']
+end
+
+task :default => ['spec']
+
+namespace :db do
+  task :load_config do
+    require "./server"
+  end
+end
